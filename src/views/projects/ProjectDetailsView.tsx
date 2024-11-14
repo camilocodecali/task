@@ -2,6 +2,9 @@ import { useParams, useNavigate, Navigate, useLocation } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query";
 import { getProjectById } from "@/api/ProjectAPI";
 import AddTaskModal from "@/components/tasks/AddTaskModal";
+import TaskList from "@/components/tasks/TaskList";
+import EditTaskData from "@/components/tasks/EditTaskData";
+
 
 export default function ProjectDetailsView() {
 
@@ -17,7 +20,7 @@ export default function ProjectDetailsView() {
 
       if (isLoading) return "Cargando...";
       if(isError) return <Navigate to='/404' />
-    
+
   if(data)return (
     <>
     <h1 className="text-5xl font-black">{data.projectName}</h1>
@@ -32,7 +35,10 @@ export default function ProjectDetailsView() {
             Agregar Tarea
         </button>
     </nav>
+
+    <TaskList tasks={data.tasks}/>
     <AddTaskModal/>
+    <EditTaskData />
     </>
   )
 }
