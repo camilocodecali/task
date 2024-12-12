@@ -1,7 +1,13 @@
 import { Fragment } from "react";
-import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
+import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
 import { Task } from "@/types/index";
-import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Transition,
+} from "@headlessui/react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteTask } from "@/api/TaskAPI";
@@ -9,26 +15,26 @@ import { toast } from "react-toastify";
 
 type TaskCardProps = {
   task: Task;
+  canEdit: boolean;
 };
 
-export default function TaskCard({ task }: TaskCardProps) {
+export default function TaskCard({ task, canEdit }: TaskCardProps) {
+  const navigate = useNavigate();
+  const params = useParams();
+  const projectId = params.projectId!;
 
-  const navigate = useNavigate()
-  const params = useParams()
-  const projectId = params.projectId!
+  const queryClient = useQueryClient();
 
-  const queryClient = useQueryClient()
-
-  const {mutate} = useMutation({
+  const { mutate } = useMutation({
     mutationFn: deleteTask,
     onError: (error) => {
-      toast.error(error.message)
+      toast.error(error.message);
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({queryKey:["project", projectId]})
-      toast.success(data)
-    }
-  })
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      toast.success(data);
+    },
+  });
 
   return (
     <li className="p-5 bg-white border-slate-300 flex justify-between gap-3">
@@ -36,6 +42,9 @@ export default function TaskCard({ task }: TaskCardProps) {
         <button
           type="button"
           className="text-xl font-bold text-slate-600 text-left"
+          onClick={() =>
+            navigate(location.pathname + `?viewTask=${task._id}`)
+          }
         >
           {task.name}
         </button>
@@ -61,30 +70,38 @@ export default function TaskCard({ task }: TaskCardProps) {
                 <button
                   type="button"
                   className="block px-3 py-1 text-sm leading-6 text-gray-900"
-                  onClick={()=> navigate(location.pathname + `?viewTask=${task._id}`)}
+                  onClick={() =>
+                    navigate(location.pathname + `?viewTask=${task._id}`)
+                  }
                 >
                   Ver Tarea
                 </button>
               </MenuItem>
-              <MenuItem>
-                <button
-                  type="button"
-                  className="block px-3 py-1 text-sm leading-6 text-gray-900"
-                  onClick = {()=> navigate(location.pathname + `?editTask=${task._id}`)}
-                >
-                  Editar Tarea
-                </button>
-              </MenuItem>
+              {canEdit && (
+                <>
+                  <MenuItem>
+                    <button
+                      type="button"
+                      className="block px-3 py-1 text-sm leading-6 text-gray-900"
+                      onClick={() =>
+                        navigate(location.pathname + `?editTask=${task._id}`)
+                      }
+                    >
+                      Editar Tarea
+                    </button>
+                  </MenuItem>
 
-              <MenuItem>
-                <button
-                  type="button"
-                  className="block px-3 py-1 text-sm leading-6 text-red-500"
-                  onClick={()=> mutate({projectId, taskId: task._id})}
-                >
-                  Eliminar Tarea
-                </button>
-              </MenuItem>
+                  <MenuItem>
+                    <button
+                      type="button"
+                      className="block px-3 py-1 text-sm leading-6 text-red-500"
+                      onClick={() => mutate({ projectId, taskId: task._id })}
+                    >
+                      Eliminar Tarea
+                    </button>
+                  </MenuItem>
+                </>
+              )}
             </MenuItems>
           </Transition>
         </Menu>
