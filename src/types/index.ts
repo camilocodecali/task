@@ -39,8 +39,14 @@ export const taskSchema = z.object({
     description: z.string(),
     project: z.string(),
     status: taskStatusSchema,
+    completedBy: z.array(z.object({
+        _id: z.string(),
+        user: userSchema,
+        status: taskStatusSchema
+    }
+    )),
     createdAt: z.string(),
-    updatedAt: z.string()
+    updatedAt: z.string(),
 })
 
 export type Task = z.infer<typeof taskSchema>
